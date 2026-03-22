@@ -1,12 +1,11 @@
 import { expect } from '@wdio/globals'
-
+import LoginPage from '../pageobjects/login.page.js'
 
 describe('Sauce Demo Login', () => {
 
     it('should login with valid credentials', async () => {
 
         await LoginPage.open()
-
         await LoginPage.login('standard_user', 'secret_sauce')
 
         await expect(browser).toHaveUrl('https://www.saucedemo.com/inventory.html')
@@ -15,43 +14,38 @@ describe('Sauce Demo Login', () => {
 
 })
 
-import LoginPage from '../pageobjects/login.page.js'
-
 describe('SauceDemo User Login Tests', () => {
 
     const password = 'secret_sauce'
 
     const users = [
-        'standard_user',
-        'locked_out_user',
-        'problem_user',
-        'performance_glitch_user',
-        'error_user',
-        'visual_user'
+        { username: 'standard_user', valid: true },
+        { username: 'locked_out_user', valid: false },
+        { username: 'problem_user', valid: true },
+        { username: 'performance_glitch_user', valid: true },
+        { username: 'error_user', valid: true },
+        { username: 'visual_user', valid: true }
     ]
 
-    users.forEach((user) => {
+    users.forEach(({ username, valid }) => {
 
-        it(`POSITIVE TEST - ${user} attempts login`, async () => {
+        it(`POSITIVE TEST - ${username}`, async () => {
 
             await LoginPage.open()
+            await LoginPage.login(username, password)
 
-            await LoginPage.login(user, password)
-
-            if (user === 'locked_out_user') {
-                await expect($('.error-message-container')).toBeDisplayed()
-            } else {
+            if (valid) {
                 await expect(browser).toHaveUrl('https://www.saucedemo.com/inventory.html')
+            } else {
+                await expect($('.error-message-container')).toBeDisplayed()
             }
 
         })
 
-
-        it(`NEGATIVE TEST - ${user} with incorrect password`, async () => {
+        it(`NEGATIVE TEST - ${username} wrong password`, async () => {
 
             await LoginPage.open()
-
-            await LoginPage.login(user, 'wrong_password')
+            await LoginPage.login(username, 'wrong_password')
 
             await expect($('.error-message-container')).toBeDisplayed()
 
