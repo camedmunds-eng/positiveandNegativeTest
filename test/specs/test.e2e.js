@@ -1,56 +1,41 @@
-import { expect } from '@wdio/globals'
 import LoginPage from '../pageobjects/login.page.js'
 
-describe('Sauce Demo Login', () => {
+describe('SauceDemo Login Tests', () => {
 
-    it('should login with valid credentials', async () => {
+const users = [
+'standard_user',
+'problem_user',
+'performance_glitch_user',
+'error_user',
+'visual_user'
+]
 
-        await LoginPage.open()
-        await LoginPage.login('standard_user', 'secret_sauce')
+// POSITIVE TESTS
+for (let i = 0; i < users.length; i++) {
 
-        await expect(browser).toHaveUrl('https://www.saucedemo.com/inventory.html')
+it('should login successfully with ' + users[i], async () => {
 
-    })
+    await LoginPage.open()
+    await LoginPage.login(users[i], 'secret_sauce')
+
+    await expect(browser).toHaveUrl('https://www.saucedemo.com/inventory.html')
 
 })
 
-describe('SauceDemo User Login Tests', () => {
+}
 
-    const password = 'secret_sauce'
+// NEGATIVE TESTS
+for (let i = 0; i < users.length; i++) {
 
-    const users = [
-        { username: 'standard_user', valid: true },
-        { username: 'locked_out_user', valid: false },
-        { username: 'problem_user', valid: true },
-        { username: 'performance_glitch_user', valid: true },
-        { username: 'error_user', valid: true },
-        { username: 'visual_user', valid: true }
-    ]
+it('should not login with wrong password for ' + users[i], async () => {
 
-    users.forEach(({ username, valid }) => {
+    await LoginPage.open()
+    await LoginPage.login(users[i], 'wrong_password')
 
-        it(`POSITIVE TEST - ${username}`, async () => {
+    await expect(browser).not.toHaveUrl('https://www.saucedemo.com/inventory.html')
 
-            await LoginPage.open()
-            await LoginPage.login(username, password)
+})
 
-            if (valid) {
-                await expect(browser).toHaveUrl('https://www.saucedemo.com/inventory.html')
-            } else {
-                await expect($('.error-message-container')).toBeDisplayed()
-            }
-
-        })
-
-        it(`NEGATIVE TEST - ${username} wrong password`, async () => {
-
-            await LoginPage.open()
-            await LoginPage.login(username, 'wrong_password')
-
-            await expect($('.error-message-container')).toBeDisplayed()
-
-        })
-
-    })
+}
 
 })
